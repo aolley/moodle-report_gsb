@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die;
 /**
  * Clean up course medals where a course has been deleted
  */
-function gsb_cleanup_medals() {
+function report_gsb_cleanup_medals() {
     global $DB;
     $removesql = "SELECT ids
                   FROM {block_gsb_content} bgc
@@ -52,7 +52,7 @@ function gsb_cleanup_medals() {
 /**
  * Clean up course medals where sub categories are no longer included in medals
  */
-function gsb_subcat_cleanup(){
+function report_gsb_subcat_cleanup() {
     global $DB;
     $removesql = "SELECT id
                   FROM {course} c

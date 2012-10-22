@@ -50,13 +50,13 @@ $config = get_config('report_gsb');
 }
 
 //Clean up course medals where a course has been deleted
-gsb_cleanup_medals();
+report_gsb_cleanup_medals();
 	
 	
 //Remove any previously awarded Sub category medals if sub categories are disabled. 
 if($config->subcategories == 0) {
 
-	gsb_subcat_cleanup();
+	report_gsb_subcat_cleanup();
 
 }
 	
