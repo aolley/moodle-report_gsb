@@ -40,7 +40,7 @@ admin_externalpage_setup('report_gsb');
 echo $OUTPUT->header().
      $OUTPUT->heading(get_string('gsbadmin', 'report_gsb'));
 
-$config = get_config('gsb'); 
+$config = get_config('report_gsb');
 
  if(isset($_POST['categoryid'])) {
 	$submitted = $_POST['submit2'];
