@@ -246,6 +246,7 @@ foreach($get_dept_codes as $row => $values) {
 		$contextid = $values->id;	
 
 		$enrolnum =  $DB->count_records('role_assignments', array('contextid'=>$contextid));
+        $updgsb = new stdClass();
 		$updgsb->id = $gsbid;
 		$updgsb->enrolnum = $enrolnum;
 		if ($DB->record_exists('block_gsb_content', array('id' => $updgsb->id))) {
