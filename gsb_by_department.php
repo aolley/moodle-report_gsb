@@ -404,25 +404,27 @@ foreach($get_dept_codes as $row => $values) {
 	} 	
 
 		
+list ($insql, $params) = $DB->get_in_or_equal(explode(',', $config->studentrole), SQL_PARAMS_NAMED);
+$params['cid'] = $courseid;
 	$nostudent = $DB->get_record_sql("SELECT c.id, COUNT(ra.userid) AS students 
 									FROM {course} c LEFT OUTER JOIN {context} cx ON c.id = cx.instanceid 
 									LEFT OUTER JOIN {role_assignments} ra ON cx.id = ra.contextid 
-									AND ra.roleid = '5' 
-									WHERE cx.contextlevel = '50' AND c.id = $courseid
-									GROUP BY c.id");
+									AND ra.roleid $insql
+									WHERE cx.contextlevel = ".CONTEXT_COURSE." AND c.id = :cid
+									GROUP BY c.id", $params);
 
 
 	//Average Student Views per course	
 	$studentviewsobj = $DB->get_record_sql("SELECT (count(l.userid)) AS Views
 										 FROM {log} l, {user} u, {role_assignments} r
-										 WHERE l.course=$courseid
+										 WHERE l.course = :cid
 										 AND l.userid = u.id
 										 AND r.contextid= (
 										 SELECT id
 										 FROM {context}
-										 WHERE contextlevel=50 AND instanceid=l.course
-										 )AND r.roleid=5
-										 AND r.userid = u.id");
+										 WHERE contextlevel= ".CONTEXT_COURSE." AND instanceid=l.course
+										 )AND r.roleid $insql
+										 AND r.userid = u.id", $params);
  
 	$studentviews = round($studentviewsobj->views / $nostudent->students);
 	

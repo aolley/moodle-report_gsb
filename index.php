@@ -197,7 +197,7 @@ $bronze_total = $DB->count_records('block_gsb_content', array('gsb'=>'Bronze'));
 $total_medals = $gold_total + $silver_total + $bronze_total;				
 $indev_count = $total - $total_medals ;
 
-if($total_medals >0) {
+if($total_medals >0 && $total > 0) {
 
 	$gold_perc = $gold_total / $total * 100;
 	$gold_perc_form = sprintf ('%01.1f', $gold_perc);
