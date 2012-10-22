@@ -63,8 +63,11 @@ if($config->subcategories == 0) {
 	//Once medals are set from gsb_by_department.php
 if (ISSET($submitted)) {
 
-	$sql = "SELECT c.id, g.gsboverride FROM {course}, {block_gsb_content} g JOIN {course} c ON c.id = g.ids WHERE {course}.category = " . $categoryid . " GROUP BY c.id";
-	$get_dept_codes = $DB->get_records_sql($sql);
+    $sql = "SELECT c.id, g.gsboverride
+            FROM {course} c, {block_gsb_content} g
+            WHERE c.id = g.ids AND c.category = :catid
+            GROUP BY c.id, g.gsboverride";
+    $get_dept_codes = $DB->get_records_sql($sql, array('catid' => $categoryid));
 
 
 	foreach($get_dept_codes as $row => $values) {
@@ -118,6 +121,7 @@ if (ISSET($submitted)) {
 				
 				default: 
 					$finalgsb = $override;
+					$updgsb = new stdClass();
 					$updgsb->id = $gsbid;
 					$updgsb->gsb = $finalgsb;
 					$updgsb->gsboverride = 'yes';
