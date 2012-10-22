@@ -40,6 +40,9 @@ if ($ADMIN->fulltree) {
 
     //--- general settings -----------------------------------------------------------------------------------
 
+    $settings->add(new admin_setting_pickroles('report_gsb/studentrole', get_string('roles'),
+                        '', array('student')));
+
     $settings->add(new admin_setting_configcheckbox('report_gsb/subcategories',
         new lang_string('subcategories', 'report_gsb'), new lang_string('subcategoriesxp', 'report_gsb'), 0));
 

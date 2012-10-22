@@ -161,23 +161,28 @@ foreach ($get_dept_codes as $record => $value) {
 echo "</select></p><p><input type='submit' value='Submit' name='submit'></p></form>";
 $enrolments = $config->minenrolments;
 	
-if($config->subcategories == '1') {
-	
-	$totalcourses = $DB->get_records_sql("SELECT {course}.id, {role_assignments}.roleid, Count({role_assignments}.roleid) AS studentsenrolled
-										FROM {user} INNER JOIN (({role_assignments} INNER JOIN {context} ON {role_assignments}.contextid = {context}.id) INNER JOIN ({course} INNER JOIN {course_categories} ON {course}.category = {course_categories}.id) ON {context}.instanceid = {course}.id) ON {user}.id = {role_assignments}.userid
-										GROUP BY {role_assignments}.roleid, {course}.id
-										HAVING ((({role_assignments}.roleid)=5) AND ((Count({role_assignments}.roleid))>= $enrolments))
-										ORDER BY Count({role_assignments}.roleid)");	
-} else {
 
-	$totalcourses = $DB->get_records_sql("SELECT {course}.id, {role_assignments}.roleid, Count({role_assignments}.roleid) AS studentsenrolled, {course_categories}.depth
-										FROM {user} INNER JOIN (({role_assignments} INNER JOIN {context} ON {role_assignments}.contextid = {context}.id) INNER JOIN ({course} INNER JOIN {course_categories} ON {course}.category = {course_categories}.id) ON {context}.instanceid = {course}.id) ON {user}.id = {role_assignments}.userid
-										WHERE ((({course_categories}.depth)=1))
-										GROUP BY {role_assignments}.roleid, {course}.id
-										HAVING ((({role_assignments}.roleid)=5) AND ((Count({role_assignments}.roleid))>= $enrolments))
-										ORDER BY Count({role_assignments}.roleid)");
-								 						 
-}							 
+list ($insql, $params) = $DB->get_in_or_equal(explode(',', $config->studentrole), SQL_PARAMS_NAMED);
+if($config->subcategories == '1') {
+    $sql = "SELECT c.id, ra.roleid, COUNT(ra.roleid) AS studentsenrolled
+            FROM {course} c
+            JOIN {context} ctx ON (ctx.instanceid = c.id AND ctx.contextlevel = ".CONTEXT_COURSE.")
+            JOIN {role_assignments} ra ON (ra.contextid = ctx.id)
+            WHERE ra.roleid $insql
+            GROUP BY c.id, ra.roleid
+            HAVING COUNT(ra.roleid) > :enrolments";
+} else {
+    $sql = "SELECT c.id, ra.roleid, COUNT(ra.roleid) AS studentsenrolled, cc.depth
+            FROM {course} c
+            JOIN {context} ctx ON (ctx.instanceid = c.id AND ctx.contextlevel = ".CONTEXT_COURSE.")
+            JOIN {course_categories} cc ON (cc.id = c.category)
+            JOIN {role_assignments} ra ON (ra.contextid = ctx.id)
+            WHERE ra.roleid $insql AND cc.depth = 1
+            GROUP BY c.id, ra.roleid, cc.depth
+            HAVING COUNT(ra.roleid) > :enrolments";
+}
+$params['enrolments'] = $enrolments;
+$totalcourses = $DB->get_records_sql($sql, $params);
 
 $total = count($totalcourses);
 

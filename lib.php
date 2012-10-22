@@ -30,10 +30,15 @@ defined('MOODLE_INTERNAL') || die;
  */
 function gsb_cleanup_medals() {
     global $DB;
-    $removesql = "SELECT ids FROM {block_gsb_content} WHERE  {block_gsb_content}.ids NOT IN (SELECT {block_gsb_content}.ids
-                FROM {block_gsb_content} INNER JOIN {course} ON {block_gsb_content}.ids = {course}.id
-                WHERE {course}.id = {block_gsb_content}.ids
-                GROUP BY {course}.id)";
+    $removesql = "SELECT ids
+                  FROM {block_gsb_content} bgc
+                  WHERE bgc.ids NOT IN (
+                      SELECT bgc.ids
+                      FROM {block_gsb_content} bgc
+                      JOIN {course} c ON bgc.ids = c.id
+                      WHERE c.id = bgc.ids
+                      GROUP BY c.id, bgc.ids
+                  )";
     $remove = $DB->get_records_sql($removesql);
 
     foreach($remove as $row => $values) {
@@ -49,17 +54,21 @@ function gsb_cleanup_medals() {
  */
 function gsb_subcat_cleanup(){
     global $DB;
-    $removesql = "SELECT  id FROM {course} WHERE  {course}.id NOT IN (SELECT {course}.id
-                  FROM ({course} INNER JOIN {course_categories} ON {course}.category = {course_categories}.id)
-                  WHERE ((({course_categories}.depth)=1))
-                  GROUP BY {course}.id)";
+    $removesql = "SELECT id
+                  FROM {course} c
+                  WHERE c.id NOT IN (
+                      SELECT c.id
+                      FROM {course} c
+                      JOIN {course_categories} cc ON c.category = cc.id
+                      WHERE cc.depth = 1
+                      GROUP BY c.id
+                  )";
     $remove = $DB->get_records_sql($removesql);
 
     foreach($remove as $row => $values) {
         $courseid = $values->id;
-        $table = "block_gsb_content";
         $conditions = array('ids' => $courseid);
-        $test = $DB->delete_records($table, $conditions);
+        $test = $DB->delete_records('block_gsb_content', $conditions);
     }
 }
 
