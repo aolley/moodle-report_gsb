@@ -40,7 +40,7 @@ admin_externalpage_setup('report_gsb');
 echo $OUTPUT->header().
      $OUTPUT->heading(get_string('gsbdepartment', 'report_gsb'));
 	 
-$config = get_config('gsb');
+$config = get_config('report_gsb');
 
 
 
@@ -236,9 +236,10 @@ foreach($get_dept_codes as $row => $values) {
 			
 			
 	//selecting the context id for enrolments. This then can be used to search the number of course enrolments. 
-	$level = '50';
-	$sql = "SELECT {context}.id FROM  {context}	WHERE {context}.contextlevel = '$level' AND {context}.instanceid = '$courseid'";
-	$context = $DB->get_records_sql($sql);
+    $sql = "SELECT id
+            FROM {context}
+            WHERE contextlevel = ".CONTEXT_COURSE." AND instanceid = :cid";
+	$context = $DB->get_records_sql($sql, array('cid' => $courseid));
 
 	foreach($context as $row => $values) {
 	
